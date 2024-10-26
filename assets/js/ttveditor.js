@@ -5,6 +5,61 @@
 
     var softLimitTitle = parseInt(ttveditorData.soft_limit_title, 10);
     var hardLimitTitle = parseInt(ttveditorData.hard_limit_title, 10);
+	
+	function wpautop(text, br = true) {
+	    if (text.trim() === '') return '';
+
+	    // Pad the end of the text to simplify processing
+	    text += "\n";
+
+	    // Preserve <pre> tags and their contents
+	    let preTags = [];
+	    text = text.replace(/<pre[\s\S]*?<\/pre>/g, match => {
+	        let token = `<pre-wp-autop-${preTags.length}>`;
+	        preTags.push(match);
+	        return token;
+	    });
+
+	    // Replace multiple <br>'s with two line breaks
+	    text = text.replace(/<br\s*\/?>\s*<br\s*\/?>/g, "\n\n");
+
+	    // Block-level elements that require double line breaks around them
+	    const blockTags = '(table|thead|tfoot|caption|col|colgroup|tbody|tr|td|th|div|dl|dd|dt|ul|ol|li|pre|form|map|area|blockquote|address|style|p|h[1-6]|hr|fieldset|legend|section|article|aside|hgroup|header|footer|nav|figure|figcaption|details|menu|summary)';
+
+	    // Add a double line break before and after block-level elements
+	    const doubleBreakRegex = new RegExp(`(<${blockTags}[^>]*>)`, 'gi');
+	    text = text.replace(doubleBreakRegex, "\n\n$1");
+	    const doubleBreakCloseRegex = new RegExp(`(</${blockTags}>)`, 'gi');
+	    text = text.replace(doubleBreakCloseRegex, "$1\n\n");
+
+	    // Standardize newline characters
+	    text = text.replace(/\r\n|\r/g, "\n");
+
+	    // Convert single line breaks to <br> tags
+	    if (br) {
+	        text = text.replace(/([^\n])\n([^\n])/g, "$1<br />\n$2");
+	    }
+
+	    // Remove more than two consecutive line breaks
+	    text = text.replace(/\n\n+/g, "\n\n");
+
+	    // Split the text into paragraphs by double line breaks
+	    let paragraphs = text.split(/\n\s*\n/).map(paragraph => `<p>${paragraph.trim()}</p>`);
+
+	    // Join paragraphs with newline after each </p>
+	    text = paragraphs.join("\n");
+
+	    // Restore <pre> tags
+	    preTags.forEach((original, i) => {
+	        text = text.replace(`<pre-wp-autop-${i}>`, original);
+	    });
+
+	    // Remove any <br> tags that are next to block elements
+	    const cleanupRegex = new RegExp(`(<br />\\s*)?(<${blockTags}[^>]*>)\\s*<br />`, 'gi');
+	    text = text.replace(cleanupRegex, "$2");
+
+	    return text.trim();
+	}
 
     function base64EncodeUnicode(str) {
         return btoa(unescape(encodeURIComponent(str)));
@@ -30,7 +85,7 @@
             pages.forEach(function(pageContent) {
                 var data = {
                     "type": "text",
-                    "body": pageContent,
+                    "body": wpautop(pageContent),
                     "title": titleValue,
                     "duration": 5000,
                     "image": ttveditorData.image_url
