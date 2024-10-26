@@ -172,7 +172,7 @@
             previewButton.textContent = 'Preview';
             previewButton.type = 'button';
             previewButton.className = 'generate-preview-button button-secondary';
-            previewButton.style.marginTop = '1rem';
+            previewButton.style.marginTop = '1em';
 
             // Append the button after the textarea
             textArea.parentNode.appendChild(previewButton);
