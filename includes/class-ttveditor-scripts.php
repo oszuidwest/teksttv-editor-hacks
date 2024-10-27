@@ -37,7 +37,7 @@ class Scripts
                 // Enqueue JavaScript file
                 wp_enqueue_script(
                     'ttveditor-script',
-                    plugins_url('assets/js/ttveditor.js', __FILE__),
+                    plugins_url('../assets/js/ttveditor.js', __FILE__),
                     array(),
                     '1.0',
                     true
