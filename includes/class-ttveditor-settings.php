@@ -165,18 +165,18 @@ class Settings
     {
         printf(
             '<input type="text" id="preview_url" name="ttveditor_options[preview_url]" value="%s" style="width: 400px;" />',
-            isset($this->options['preview_url']) ? esc_attr($this->options['preview_url']) : 'https://previews.teksttv.pages.dev/preview?data='
+            isset($this->options['preview_url']) ? esc_attr($this->options['preview_url']) : 'https://teksttv.pages.dev/preview?data='
         );
-        echo '<p class="description">The base URL used for previews. The base64 data will be appended to this URL.</p>';
+        echo '<p class="description">De basis-URL die wordt gebruikt voor previews. De base64-data wordt aan deze URL toegevoegd.</p>';
     }
 
     public function image_url_callback()
     {
         printf(
             '<input type="text" id="image_url" name="ttveditor_options[image_url]" value="%s" style="width: 400px;" />',
-            isset($this->options['image_url']) ? esc_attr($this->options['image_url']) : 'https://preview.zuidwestupdate.nl/wp-content/uploads/2024/10/hamhammm.png'
+            isset($this->options['image_url']) ? esc_attr($this->options['image_url']) : 'https://upload.wikimedia.org/wikipedia/commons/c/ca/1x1.png'
         );
-        echo '<p class="description">The image URL to be included in the JSON data.</p>';
+        echo '<p class="description">De afbeelding die bij de preview wordt getoond.</p>';
     }
 
     public function soft_limit_title_callback()
@@ -185,7 +185,7 @@ class Settings
             '<input type="number" id="soft_limit_title" name="ttveditor_options[soft_limit_title]" value="%s" />',
             isset($this->options['soft_limit_title']) ? esc_attr($this->options['soft_limit_title']) : '45'
         );
-        echo '<p class="description">Soft character limit for the title.</p>';
+        echo '<p class="description">Zachte tekenlimiet voor de titel.</p>';
     }
 
     public function hard_limit_title_callback()
@@ -194,7 +194,7 @@ class Settings
             '<input type="number" id="hard_limit_title" name="ttveditor_options[hard_limit_title]" value="%s" />',
             isset($this->options['hard_limit_title']) ? esc_attr($this->options['hard_limit_title']) : '50'
         );
-        echo '<p class="description">Hard character limit for the title.</p>';
+        echo '<p class="description">Harde tekenlimiet voor de titel.</p>';
     }
 
     public function soft_limit_textarea_callback()
@@ -203,7 +203,7 @@ class Settings
             '<input type="number" id="soft_limit_textarea" name="ttveditor_options[soft_limit_textarea]" value="%s" />',
             isset($this->options['soft_limit_textarea']) ? esc_attr($this->options['soft_limit_textarea']) : '450'
         );
-        echo '<p class="description">Soft character limit per page in the textarea.</p>';
+        echo '<p class="description">Zachte tekenlimiet per pagina in het tekstvak.</p>';
     }
 
     public function hard_limit_textarea_callback()
@@ -212,6 +212,6 @@ class Settings
             '<input type="number" id="hard_limit_textarea" name="ttveditor_options[hard_limit_textarea]" value="%s" />',
             isset($this->options['hard_limit_textarea']) ? esc_attr($this->options['hard_limit_textarea']) : '475'
         );
-        echo '<p class="description">Hard character limit per page in the textarea.</p>';
+        echo '<p class="description">Harde tekenlimiet per pagina in het tekstvak.</p>';
     }
 }
