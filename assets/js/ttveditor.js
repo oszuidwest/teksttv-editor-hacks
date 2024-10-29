@@ -1,248 +1,283 @@
-(function(){
-    // Character limit settings from localized script data
-    var softLimitTextarea = parseInt(ttveditorData.soft_limit_textarea, 10);
-    var hardLimitTextarea = parseInt(ttveditorData.hard_limit_textarea, 10);
+// Character limit settings from localized script data
+const softLimitTextarea = parseInt(ttveditorData.soft_limit_textarea, 10);
+const hardLimitTextarea = parseInt(ttveditorData.hard_limit_textarea, 10);
+const softLimitTitle = parseInt(ttveditorData.soft_limit_title, 10);
+const hardLimitTitle = parseInt(ttveditorData.hard_limit_title, 10);
 
-    var softLimitTitle = parseInt(ttveditorData.soft_limit_title, 10);
-    var hardLimitTitle = parseInt(ttveditorData.hard_limit_title, 10);
-	
-	function wpautop(text, br = true) {
-	    if (text.trim() === '') return '';
+const TITLE_INPUT_ID = 'title';
+const TEXTAREA_ID = 'acf-field_5f21a06d22c58';
 
-	    // Pad the end of the text to simplify processing
-	    text += "\n";
-
-	    // Preserve <pre> tags and their contents
-	    let preTags = [];
-	    text = text.replace(/<pre[\s\S]*?<\/pre>/g, match => {
-	        let token = `<pre-wp-autop-${preTags.length}>`;
-	        preTags.push(match);
-	        return token;
-	    });
-
-	    // Replace multiple <br>'s with two line breaks
-	    text = text.replace(/<br\s*\/?>\s*<br\s*\/?>/g, "\n\n");
-
-	    // Block-level elements that require double line breaks around them
-	    const blockTags = '(table|thead|tfoot|caption|col|colgroup|tbody|tr|td|th|div|dl|dd|dt|ul|ol|li|pre|form|map|area|blockquote|address|style|p|h[1-6]|hr|fieldset|legend|section|article|aside|hgroup|header|footer|nav|figure|figcaption|details|menu|summary)';
-
-	    // Add a double line break before and after block-level elements
-	    const doubleBreakRegex = new RegExp(`(<${blockTags}[^>]*>)`, 'gi');
-	    text = text.replace(doubleBreakRegex, "\n\n$1");
-	    const doubleBreakCloseRegex = new RegExp(`(</${blockTags}>)`, 'gi');
-	    text = text.replace(doubleBreakCloseRegex, "$1\n\n");
-
-	    // Standardize newline characters
-	    text = text.replace(/\r\n|\r/g, "\n");
-
-	    // Convert single line breaks to <br> tags
-	    if (br) {
-	        text = text.replace(/([^\n])\n([^\n])/g, "$1<br />\n$2");
-	    }
-
-	    // Remove more than two consecutive line breaks
-	    text = text.replace(/\n\n+/g, "\n\n");
-
-	    // Split the text into paragraphs by double line breaks
-	    let paragraphs = text.split(/\n\s*\n/).map(paragraph => `<p>${paragraph.trim()}</p>`);
-
-	    // Join paragraphs with newline after each </p>
-	    text = paragraphs.join("\n");
-
-	    // Restore <pre> tags
-	    preTags.forEach((original, i) => {
-	        text = text.replace(`<pre-wp-autop-${i}>`, original);
-	    });
-
-	    // Remove any <br> tags that are next to block elements
-	    const cleanupRegex = new RegExp(`(<br />\\s*)?(<${blockTags}[^>]*>)\\s*<br />`, 'gi');
-	    text = text.replace(cleanupRegex, "$2");
-
-	    return text.trim();
-	}
-
-    function base64EncodeUnicode(str) {
-        return btoa(unescape(encodeURIComponent(str)));
+// Hack in CSS styles
+function addStyles() {
+    const styles = `
+    /* Modal styles */
+    #preview-modal {
+        display: none; /* Hidden by default */
+        position: fixed;
+        z-index: 9999; /* Sit on top */
+        left: 0;
+        top: 0;
+        width: 100%; /* Full width */
+        height: 100%; /* Full height */
+        overflow: auto;
+        background-color: rgba(0,0,0,0.5); /* Black background with opacity */
     }
 
-    function generateBase64() {
-        var titleInput = document.getElementById('title');
-        var textArea = document.getElementById('acf-field_5f21a06d22c58');
-
-        if (titleInput && textArea) {
-            var titleValue = titleInput.value;
-            var textValue = textArea.value;
-
-            // Split the text by '---' to handle multiple pages
-            var pages = textValue.split('---').map(function(page) {
-                return page.trim();
-            }).filter(function(page) {
-                return page.length > 0;
-            });
-
-            var base64Strings = [];
-
-            pages.forEach(function(pageContent) {
-                var data = {
-                    "type": "text",
-                    "body": wpautop(pageContent),
-                    "title": titleValue,
-                    "duration": 5000,
-                    "image": ttveditorData.image_url
-                };
-
-                var jsonString = JSON.stringify(data);
-                var base64String = base64EncodeUnicode(jsonString);
-
-                base64Strings.push(base64String);
-            });
-
-            return base64Strings;
-        } else {
-            console.error('Title input or textarea not found.');
-            return [];
-        }
+    #preview-modal-content {
+        background-color: #fefefe;
+        margin: 5% auto; /* 5% from top and centered */
+        padding: 20px;
+        border: 1px solid #888;
+        width: fit-content;
+        position: relative;
     }
 
-    function generateAndLogBase64() {
-        var base64Strings = generateBase64();
-        if (base64Strings.length > 0) {
-            base64Strings.forEach(function(base64String) {
-                console.log(base64String);
-            });
-        }
+    #preview-modal-close {
+        color: #aaa;
+        position: absolute;
+        right: 10px;
+        top: 10px;
+        font-size: 28px;
+        font-weight: bold;
+        cursor: pointer;
     }
 
-    // Character limit checker
-    function checkCharacterLimits() {
-        var titleInput = document.getElementById('title');
-        var textArea = document.getElementById('acf-field_5f21a06d22c58');
-        var warnings = [];
-        var overHardLimit = false;
+    #preview-modal-close:hover,
+    #preview-modal-close:focus {
+        color: black;
+        text-decoration: none;
+        cursor: pointer;
+    }
+    `;
 
-        // Check textarea
-        if (textArea) {
-            var text = textArea.value;
-            var pages = text.split('---');
+    const styleSheet = document.createElement("style");
+    styleSheet.type = "text/css";
+    styleSheet.innerText = styles;
+    document.head.appendChild(styleSheet);
+}
 
-            pages.forEach(function(pageText, index) {
-                var pageNum = index + 1;
-                var length = pageText.trim().length;
+// Mimic WordPress's wpautop function TODO: Replace with real wpautop
+function wpautop(text, br = true) {
+    if (text.trim() === '') return '';
 
-                if (length >= softLimitTextarea && length < hardLimitTextarea) {
-                    // Soft limit warning in gray
-                    warnings.push('<li style="color: gray;">Pagina ' + pageNum + ' nadert de limiet van ' + hardLimitTextarea + ' tekens (' + length + ' tekens).</li>');
-                } 
-                if (length >= hardLimitTextarea) {
-                    // Hard limit warning in red
-                    warnings.push('<li style="color: red;">Pagina ' + pageNum + ' heeft de limiet van ' + hardLimitTextarea + ' tekens overschreden! (' + length + ' tekens).</li>');
-                    overHardLimit = true;
-                }
-            });
-        }
+    text += "\n";
 
-        // Check title
-        if (titleInput) {
-            var titleLength = titleInput.value.length;
+    const preTags = [];
+    text = text.replace(/<pre[\s\S]*?<\/pre>/g, match => {
+        const token = `<pre-wp-autop-${preTags.length}>`;
+        preTags.push(match);
+        return token;
+    });
 
-            if (titleLength >= softLimitTitle && titleLength < hardLimitTitle) {
-                // Soft limit warning in gray
-                warnings.push('<li style="color: gray;">De titel nadert de limiet van ' + hardLimitTitle + ' tekens (' + titleLength + ' tekens).</li>');
+    text = text.replace(/<br\s*\/?>\s*<br\s*\/?>/g, "\n\n");
+
+    const blockTags = '(table|thead|tfoot|caption|col|colgroup|tbody|tr|td|th|div|dl|dd|dt|ul|ol|li|pre|form|map|area|blockquote|address|style|p|h[1-6]|hr|fieldset|legend|section|article|aside|hgroup|header|footer|nav|figure|figcaption|details|menu|summary)';
+
+    text = text.replace(new RegExp(`(<${blockTags}[^>]*>)`, 'gi'), "\n\n$1");
+    text = text.replace(new RegExp(`(</${blockTags}>)`, 'gi'), "$1\n\n");
+
+    text = text.replace(/\r\n|\r/g, "\n");
+
+    if (br) {
+        text = text.replace(/([^\n])\n([^\n])/g, "$1<br />\n$2");
+    }
+
+    text = text.replace(/\n\n+/g, "\n\n");
+
+    const paragraphs = text.split(/\n\s*\n/).map(paragraph => `<p>${paragraph.trim()}</p>`);
+    text = paragraphs.join("\n");
+
+    preTags.forEach((original, i) => {
+        text = text.replace(`<pre-wp-autop-${i}>`, original);
+    });
+
+    text = text.replace(new RegExp(`(<br />\\s*)?(<${blockTags}[^>]*>)\\s*<br />`, 'gi'), "$2");
+
+    return text.trim();
+}
+
+// Encode string to Base64, handling Unicode characters
+function base64EncodeUnicode(str) {
+    return btoa(unescape(encodeURIComponent(str)));
+}
+
+// Generate Base64 strings for each page
+function generateBase64() {
+    const titleInput = document.getElementById(TITLE_INPUT_ID);
+    const textArea = document.getElementById(TEXTAREA_ID);
+
+    if (titleInput && textArea) {
+        const titleValue = titleInput.value;
+        const textValue = textArea.value;
+
+        const pages = textValue.split('---')
+            .map(page => page.trim())
+            .filter(page => page.length > 0);
+
+        return pages.map(pageContent => {
+            const data = {
+                type: "text",
+                body: wpautop(pageContent),
+                title: titleValue,
+                duration: 5000,
+                image: ttveditorData.image_url
+            };
+            return base64EncodeUnicode(JSON.stringify(data));
+        });
+    } else {
+        console.error('Title input or textarea not found.');
+        return [];
+    }
+}
+
+// Display previews in a modal with 16:9 aspect ratio
+function showPreviewInDialog() {
+    const base64Strings = generateBase64();
+    if (base64Strings.length > 0) {
+        // Create modal elements
+        const modal = document.createElement('div');
+        modal.id = 'preview-modal';
+
+        const modalContent = document.createElement('div');
+        modalContent.id = 'preview-modal-content';
+
+        const closeModal = document.createElement('span');
+        closeModal.id = 'preview-modal-close';
+        closeModal.innerHTML = '&times;';
+        closeModal.onclick = function() {
+            document.body.removeChild(modal);
+        };
+
+        modalContent.appendChild(closeModal);
+
+        const iframeWidth = 800;
+        const iframeHeight = (iframeWidth / 16) * 9;
+
+        base64Strings.forEach(base64String => {
+            const previewUrl = ttveditorData.preview_url + encodeURIComponent(base64String);
+            const iframe = document.createElement('iframe');
+            iframe.src = previewUrl;
+            iframe.width = iframeWidth;
+            iframe.height = iframeHeight;
+            iframe.style.border = 'none';
+            iframe.style.marginBottom = '10px';
+            iframe.style.display = 'block';
+            iframe.style.marginLeft = 'auto';
+            iframe.style.marginRight = 'auto';
+            modalContent.appendChild(iframe);
+        });
+
+        modal.appendChild(modalContent);
+        document.body.appendChild(modal);
+
+        // Display the modal
+        modal.style.display = 'block';
+
+        // Close the modal when clicking outside of it
+        window.onclick = function(event) {
+            if (event.target === modal) {
+                document.body.removeChild(modal);
             }
-            if (titleLength >= hardLimitTitle) {
-                // Hard limit warning in red
-                warnings.push('<li style="color: red;">De titel heeft de limiet van ' + hardLimitTitle + ' tekens overschreden! (' + titleLength + ' tekens).</li>');
+        };
+    }
+}
+
+// Check character limits and display warnings
+function checkCharacterLimits() {
+    const titleInput = document.getElementById(TITLE_INPUT_ID);
+    const textArea = document.getElementById(TEXTAREA_ID);
+    const warnings = [];
+    let overHardLimit = false;
+
+    if (textArea) {
+        const pages = textArea.value.split('---');
+
+        pages.forEach((pageText, index) => {
+            const length = pageText.trim().length;
+            const pageNum = index + 1;
+
+            if (length >= softLimitTextarea && length < hardLimitTextarea) {
+                warnings.push(`<li style="color: gray;">Pagina ${pageNum} nadert de limiet van ${hardLimitTextarea} tekens (${length} tekens).</li>`);
+            } else if (length >= hardLimitTextarea) {
+                warnings.push(`<li style="color: red;">Pagina ${pageNum} heeft de limiet van ${hardLimitTextarea} tekens overschreden! (${length} tekens).</li>`);
                 overHardLimit = true;
             }
-        }
-
-        displayWarnings(warnings, overHardLimit);
+        });
     }
 
-    function displayWarnings(warnings, overHardLimit) {
-        removeWarnings();
+    if (titleInput) {
+        const titleLength = titleInput.value.length;
 
-        if (warnings.length > 0) {
-            var warningHtml = '<ul id="character-limit-warnings" style="margin-top: 10px; list-style: none; padding-left: 0;">';
-            warnings.forEach(function(warning){
-                warningHtml += warning;
-            });
-            warningHtml += '</ul>';
-            
-            // Insert warnings under the textarea
-            var textArea = document.getElementById('acf-field_5f21a06d22c58');
-            if (textArea) {
-                textArea.insertAdjacentHTML('afterend', warningHtml);
-            }
-        }
-
-        // Highlight inputs if over hard limit
-        var textArea = document.getElementById('acf-field_5f21a06d22c58');
-        var titleInput = document.getElementById('title');
-
-        if (overHardLimit) {
-            if (textArea) {
-                textArea.style.backgroundColor = '#ffe6e6'; // Light red
-            }
-            if (titleInput) {
-                titleInput.style.backgroundColor = '#ffe6e6'; // Light red
-            }
-        } else {
-            if (textArea) {
-                textArea.style.backgroundColor = '';
-            }
-            if (titleInput) {
-                titleInput.style.backgroundColor = '';
-            }
+        if (titleLength >= softLimitTitle && titleLength < hardLimitTitle) {
+            warnings.push(`<li style="color: gray;">De titel nadert de limiet van ${hardLimitTitle} tekens (${titleLength} tekens).</li>`);
+        } else if (titleLength >= hardLimitTitle) {
+            warnings.push(`<li style="color: red;">De titel heeft de limiet van ${hardLimitTitle} tekens overschreden! (${titleLength} tekens).</li>`);
+            overHardLimit = true;
         }
     }
 
-    function removeWarnings() {
-        var warnings = document.getElementById('character-limit-warnings');
-        if (warnings) {
-            warnings.parentNode.removeChild(warnings);
+    displayWarnings(warnings, overHardLimit);
+}
+
+// Display warnings below the textarea
+function displayWarnings(warnings, overHardLimit) {
+    removeWarnings();
+
+    if (warnings.length > 0) {
+        const warningHtml = `
+            <ul id="character-limit-warnings" style="margin-top: 10px; list-style: none; padding-left: 0;">
+                ${warnings.join('')}
+            </ul>
+        `;
+        const textArea = document.getElementById(TEXTAREA_ID);
+        if (textArea) {
+            textArea.insertAdjacentHTML('afterend', warningHtml);
         }
     }
 
-    document.addEventListener('DOMContentLoaded', function() {
-        var titleInput = document.getElementById('title');
-        var textArea = document.getElementById('acf-field_5f21a06d22c58');
+    const textArea = document.getElementById(TEXTAREA_ID);
+    const titleInput = document.getElementById(TITLE_INPUT_ID);
+    const bgColor = overHardLimit ? '#ffe6e6' : '';
 
-        if (titleInput && textArea) {
-            titleInput.addEventListener('input', function() {
-                generateAndLogBase64();
-                checkCharacterLimits();
-            });
-            textArea.addEventListener('input', function() {
-                generateAndLogBase64();
-                checkCharacterLimits();
-            });
+    if (textArea) textArea.style.backgroundColor = bgColor;
+    if (titleInput) titleInput.style.backgroundColor = bgColor;
+}
 
-            // Initial checks on page load
-            generateAndLogBase64();
-            checkCharacterLimits();
+// Remove existing warnings
+function removeWarnings() {
+    const warnings = document.getElementById('character-limit-warnings');
+    if (warnings && warnings.parentNode) {
+        warnings.parentNode.removeChild(warnings);
+    }
+}
 
-            // Insert the Preview button under the textarea
-            var previewButton = document.createElement('button');
-            previewButton.textContent = 'Preview';
-            previewButton.type = 'button';
-            previewButton.className = 'generate-preview-button button-secondary';
-            previewButton.style.marginTop = '1em';
+// Initialize the script on DOMContentLoaded
+document.addEventListener('DOMContentLoaded', function() {
+    addStyles(); // Add styles when the DOM is ready
 
-            // Append the button after the textarea
-            textArea.parentNode.appendChild(previewButton);
+    const titleInput = document.getElementById(TITLE_INPUT_ID);
+    const textArea = document.getElementById(TEXTAREA_ID);
 
-            previewButton.addEventListener('click', function() {
-                var base64Strings = generateBase64();
-                if (base64Strings.length > 0) {
-                    base64Strings.forEach(function(base64String) {
-                        var previewUrl = ttveditorData.preview_url + encodeURIComponent(base64String);
-                        window.open(previewUrl, '_blank');
-                    });
-                }
-            });
-        } else {
-            console.error('Title input or textarea not found.');
-        }
-    });
-})();
+    if (titleInput && textArea) {
+        // Create Preview button
+        const previewButton = document.createElement('button');
+        previewButton.textContent = 'Preview';
+        previewButton.type = 'button';
+        previewButton.className = 'generate-preview-button button-secondary';
+        previewButton.style.marginTop = '1em';
+
+        // Insert after the textarea
+        textArea.parentNode.insertBefore(previewButton, textArea.nextSibling);
+
+        previewButton.addEventListener('click', showPreviewInDialog);
+
+        // Add event listeners for character limit checking
+        titleInput.addEventListener('input', checkCharacterLimits);
+        textArea.addEventListener('input', checkCharacterLimits);
+
+        // Run checkCharacterLimits on page load
+        checkCharacterLimits();
+    } else {
+        console.error('Title input or textarea not found.');
+    }
+});
