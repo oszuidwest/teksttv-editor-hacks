@@ -19,7 +19,7 @@ require_once ZW_TTVEDITOR_PLUGIN_DIR . 'includes/class-ttveditor-settings.php';
 require_once ZW_TTVEDITOR_PLUGIN_DIR . 'includes/class-ttveditor-scripts.php';
 
 // Initialize the plugin
-function zw_ttveditor_plugin_init()
+function zw_ttveditor_plugin_init(): void
 {
     new \ZuidWest\TekstTVEditor\Settings();
     new \ZuidWest\TekstTVEditor\Scripts();
