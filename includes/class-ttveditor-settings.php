@@ -7,6 +7,7 @@ if (!defined('ABSPATH')) {
 
 class Settings
 {
+    /** @var array<string, mixed> */
     private $options;
 
     public function __construct()
@@ -20,7 +21,7 @@ class Settings
     }
 
     // Add settings page
-    public function add_plugin_page()
+    public function add_plugin_page(): void
     {
         add_options_page(
             'Tekst TV Editor Hacks Settings',
@@ -32,7 +33,7 @@ class Settings
     }
 
     // Settings page content
-    public function create_admin_page()
+    public function create_admin_page(): void
     {
         ?>
         <div class="wrap">
@@ -49,7 +50,7 @@ class Settings
     }
 
     // Register and add settings
-    public function page_init()
+    public function page_init(): void
     {
         register_setting(
             'ttveditor_option_group', // Option group
@@ -129,7 +130,11 @@ class Settings
     }
 
     // Sanitize input
-    public function sanitize($input)
+    /**
+     * @param array<string, mixed> $input
+     * @return array<string, mixed>
+     */
+    public function sanitize(array $input): array
     {
         $new_input = array();
 
@@ -161,7 +166,7 @@ class Settings
     }
 
     // Callback functions for settings fields
-    public function preview_url_callback()
+    public function preview_url_callback(): void
     {
         printf(
             '<input type="text" id="preview_url" name="ttveditor_options[preview_url]" value="%s" style="width: 400px;" />',
@@ -170,7 +175,7 @@ class Settings
         echo '<p class="description">De basis-URL die wordt gebruikt voor previews. De base64-data wordt aan deze URL toegevoegd.</p>';
     }
 
-    public function image_url_callback()
+    public function image_url_callback(): void
     {
         printf(
             '<input type="text" id="image_url" name="ttveditor_options[image_url]" value="%s" style="width: 400px;" />',
@@ -179,7 +184,7 @@ class Settings
         echo '<p class="description">De afbeelding die bij de preview wordt getoond.</p>';
     }
 
-    public function soft_limit_title_callback()
+    public function soft_limit_title_callback(): void
     {
         printf(
             '<input type="number" id="soft_limit_title" name="ttveditor_options[soft_limit_title]" value="%s" />',
@@ -188,7 +193,7 @@ class Settings
         echo '<p class="description">Zachte tekenlimiet voor de titel.</p>';
     }
 
-    public function hard_limit_title_callback()
+    public function hard_limit_title_callback(): void
     {
         printf(
             '<input type="number" id="hard_limit_title" name="ttveditor_options[hard_limit_title]" value="%s" />',
@@ -197,7 +202,7 @@ class Settings
         echo '<p class="description">Harde tekenlimiet voor de titel.</p>';
     }
 
-    public function soft_limit_textarea_callback()
+    public function soft_limit_textarea_callback(): void
     {
         printf(
             '<input type="number" id="soft_limit_textarea" name="ttveditor_options[soft_limit_textarea]" value="%s" />',
@@ -206,7 +211,7 @@ class Settings
         echo '<p class="description">Zachte tekenlimiet per pagina in het tekstvak.</p>';
     }
 
-    public function hard_limit_textarea_callback()
+    public function hard_limit_textarea_callback(): void
     {
         printf(
             '<input type="number" id="hard_limit_textarea" name="ttveditor_options[hard_limit_textarea]" value="%s" />',

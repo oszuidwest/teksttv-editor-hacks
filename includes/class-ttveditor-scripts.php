@@ -14,7 +14,7 @@ class Scripts
     }
 
     // Enqueue scripts
-    public function enqueue_scripts($hook_suffix)
+    public function enqueue_scripts(string $hook_suffix): void
     {
         if ('post-new.php' === $hook_suffix || 'post.php' === $hook_suffix) {
             $screen = get_current_screen();
