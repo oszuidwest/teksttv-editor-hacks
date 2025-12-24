@@ -4,6 +4,7 @@ Plugin Name: Tekst TV Editor Hacks
 Description: Enhances the Tekst TV editor with preview functionality and character limit warnings.
 Version: 0.9.1
 Author: Streekomroep ZuidWest
+License: GPL-2.0-or-later
 */
 
 if (!defined('ABSPATH')) {
