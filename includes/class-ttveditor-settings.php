@@ -2,7 +2,7 @@
 namespace ZuidWest\TekstTVEditor;
 
 if (!defined('ABSPATH')) {
-    exit; // Exit if accessed directly
+    exit; // Exits if accessed directly.
 }
 
 class Settings
@@ -12,15 +12,19 @@ class Settings
 
     public function __construct()
     {
-        // Load plugin options
+        // Loads plugin options.
         $this->options = get_option('ttveditor_options');
 
-        // Admin menu and settings
+        // Registers admin menu and settings hooks.
         add_action('admin_menu', array($this, 'add_plugin_page'));
         add_action('admin_init', array($this, 'page_init'));
     }
 
-    // Add settings page
+    /**
+     * Adds the plugin settings page to the WordPress admin menu.
+     *
+     * @return void
+     */
     public function add_plugin_page(): void
     {
         add_options_page(
@@ -32,7 +36,11 @@ class Settings
         );
     }
 
-    // Settings page content
+    /**
+     * Displays the settings page content.
+     *
+     * @return void
+     */
     public function create_admin_page(): void
     {
         ?>
@@ -49,24 +57,28 @@ class Settings
         <?php
     }
 
-    // Register and add settings
+    /**
+     * Registers and configures all plugin settings.
+     *
+     * @return void
+     */
     public function page_init(): void
     {
         register_setting(
-            'ttveditor_option_group', // Option group
-            'ttveditor_options',      // Option name
-            array($this, 'sanitize')  // Sanitize callback
+            'ttveditor_option_group',
+            'ttveditor_options',
+            array($this, 'sanitize')
         );
 
-        // Settings Section
+        // Registers the main settings section.
         add_settings_section(
-            'ttveditor_setting_section', // ID
-            'Settings',                  // Title
-            '__return_false',            // Callback
-            'ttveditor-settings'         // Page
+            'ttveditor_setting_section',
+            'Settings',
+            '__return_false',
+            'ttveditor-settings'
         );
 
-        // Preview URL
+        // Registers the preview URL field.
         add_settings_field(
             'preview_url',
             'Preview URL',
@@ -75,7 +87,7 @@ class Settings
             'ttveditor_setting_section'
         );
 
-        // Image URL
+        // Registers the image URL field.
         add_settings_field(
             'image_url',
             'Image URL',
@@ -84,15 +96,15 @@ class Settings
             'ttveditor_setting_section'
         );
 
-        // Character Limits Section
+        // Registers the character limits section.
         add_settings_section(
-            'ttveditor_character_limits_section', // ID
-            'Character Limits',                   // Title
-            '__return_false',                     // Callback
-            'ttveditor-settings'                  // Page
+            'ttveditor_character_limits_section',
+            'Character Limits',
+            '__return_false',
+            'ttveditor-settings'
         );
 
-        // Title Soft Limit
+        // Registers the title soft limit field.
         add_settings_field(
             'soft_limit_title',
             'Title Soft Limit',
@@ -101,7 +113,7 @@ class Settings
             'ttveditor_character_limits_section'
         );
 
-        // Title Hard Limit
+        // Registers the title hard limit field.
         add_settings_field(
             'hard_limit_title',
             'Title Hard Limit',
@@ -110,7 +122,7 @@ class Settings
             'ttveditor_character_limits_section'
         );
 
-        // Textarea Soft Limit
+        // Registers the textarea soft limit field.
         add_settings_field(
             'soft_limit_textarea',
             'Textarea Soft Limit',
@@ -119,7 +131,7 @@ class Settings
             'ttveditor_character_limits_section'
         );
 
-        // Textarea Hard Limit
+        // Registers the textarea hard limit field.
         add_settings_field(
             'hard_limit_textarea',
             'Textarea Hard Limit',
@@ -129,7 +141,6 @@ class Settings
         );
     }
 
-    // Sanitize input
     /**
      * @param array<string, mixed> $input
      * @return array<string, mixed>
@@ -165,7 +176,11 @@ class Settings
         return $new_input;
     }
 
-    // Callback functions for settings fields
+    /**
+     * Displays the preview URL input field.
+     *
+     * @return void
+     */
     public function preview_url_callback(): void
     {
         printf(

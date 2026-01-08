@@ -2,24 +2,29 @@
 namespace ZuidWest\TekstTVEditor;
 
 if (!defined('ABSPATH')) {
-    exit; // Exit if accessed directly
+    exit; // Exits if accessed directly.
 }
 
 class Scripts
 {
     public function __construct()
     {
-        // Enqueue scripts
+        // Registers the script enqueue hook.
         add_action('admin_enqueue_scripts', array($this, 'enqueue_scripts'));
     }
 
-    // Enqueue scripts
+    /**
+     * Enqueues editor scripts on post editing screens.
+     *
+     * @param string $hook_suffix The current admin page hook suffix.
+     * @return void
+     */
     public function enqueue_scripts(string $hook_suffix): void
     {
         if ('post-new.php' === $hook_suffix || 'post.php' === $hook_suffix) {
             $screen = get_current_screen();
             if ('post' === $screen->post_type) {
-                // Load options here to ensure they are up-to-date
+                // Loads plugin options for current configuration.
                 $options = get_option('ttveditor_options');
 
                 $script_data = array(
@@ -31,16 +36,16 @@ class Scripts
                     'hard_limit_textarea' => isset($options['hard_limit_textarea']) ? $options['hard_limit_textarea'] : 475,
                 );
 
-                // Enqueue the script without dependencies
+                // Enqueues the TekstTV editor script.
                 wp_enqueue_script(
                     'ttveditor-script',
                     plugins_url('../assets/js/ttveditor.js', __FILE__),
-                    array(), // No dependencies
+                    array(),
                     '1.0',
-                    true // Enqueue in the footer
+                    true
                 );
 
-                // Localize script data
+                // Localizes script data for client-side access.
                 wp_localize_script('ttveditor-script', 'ttveditorData', $script_data);
             }
         }

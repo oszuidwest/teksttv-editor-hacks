@@ -10,18 +10,22 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 */
 
 if (!defined('ABSPATH')) {
-    exit; // Exit if accessed directly
+    exit; // Exits if accessed directly.
 }
 
-// Define plugin constants
+// Defines plugin constants.
 define('ZW_TTVEDITOR_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('ZW_TTVEDITOR_PLUGIN_URL', plugin_dir_url(__FILE__));
 
-// Include required files
+// Includes required files.
 require_once ZW_TTVEDITOR_PLUGIN_DIR . 'includes/class-ttveditor-settings.php';
 require_once ZW_TTVEDITOR_PLUGIN_DIR . 'includes/class-ttveditor-scripts.php';
 
-// Initialize the plugin
+/**
+ * Initializes the plugin by loading settings and scripts classes.
+ *
+ * @return void
+ */
 function zw_ttveditor_plugin_init(): void
 {
     new \ZuidWest\TekstTVEditor\Settings();
