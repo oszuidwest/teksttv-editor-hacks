@@ -1,15 +1,31 @@
 <?php
+/**
+ * Settings functionality for the Tekst TV Editor plugin.
+ *
+ * @package TekstTVEditor
+ */
+
 namespace ZuidWest\TekstTVEditor;
 
 if (!defined('ABSPATH')) {
     exit; // Exits if accessed directly.
 }
 
+/**
+ * Handles plugin settings registration and admin page rendering.
+ */
 class Settings
 {
-    /** @var array<string, mixed> */
+    /**
+     * Plugin options.
+     *
+     * @var array<string, mixed>
+     */
     private $options;
 
+    /**
+     * Initializes the settings class and registers hooks.
+     */
     public function __construct()
     {
         // Loads plugin options.
@@ -142,8 +158,10 @@ class Settings
     }
 
     /**
-     * @param array<string, mixed> $input
-     * @return array<string, mixed>
+     * Sanitizes the plugin options before saving.
+     *
+     * @param array<string, mixed> $input The input options to sanitize.
+     * @return array<string, mixed> The sanitized options.
      */
     public function sanitize(array $input): array
     {
@@ -190,6 +208,11 @@ class Settings
         echo '<p class="description">De basis-URL die wordt gebruikt voor previews. De base64-data wordt aan deze URL toegevoegd.</p>';
     }
 
+    /**
+     * Displays the image URL input field.
+     *
+     * @return void
+     */
     public function image_url_callback(): void
     {
         printf(
@@ -199,6 +222,11 @@ class Settings
         echo '<p class="description">De afbeelding die bij de preview wordt getoond.</p>';
     }
 
+    /**
+     * Displays the title soft limit input field.
+     *
+     * @return void
+     */
     public function soft_limit_title_callback(): void
     {
         printf(
@@ -208,6 +236,11 @@ class Settings
         echo '<p class="description">Zachte tekenlimiet voor de titel.</p>';
     }
 
+    /**
+     * Displays the title hard limit input field.
+     *
+     * @return void
+     */
     public function hard_limit_title_callback(): void
     {
         printf(
@@ -217,6 +250,11 @@ class Settings
         echo '<p class="description">Harde tekenlimiet voor de titel.</p>';
     }
 
+    /**
+     * Displays the textarea soft limit input field.
+     *
+     * @return void
+     */
     public function soft_limit_textarea_callback(): void
     {
         printf(
@@ -226,6 +264,11 @@ class Settings
         echo '<p class="description">Zachte tekenlimiet per pagina in het tekstvak.</p>';
     }
 
+    /**
+     * Displays the textarea hard limit input field.
+     *
+     * @return void
+     */
     public function hard_limit_textarea_callback(): void
     {
         printf(

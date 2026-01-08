@@ -1,12 +1,24 @@
 <?php
+/**
+ * Scripts functionality for the Tekst TV Editor plugin.
+ *
+ * @package TekstTVEditor
+ */
+
 namespace ZuidWest\TekstTVEditor;
 
 if (!defined('ABSPATH')) {
     exit; // Exits if accessed directly.
 }
 
+/**
+ * Handles script enqueuing for the editor.
+ */
 class Scripts
 {
+    /**
+     * Initializes the scripts class and registers hooks.
+     */
     public function __construct()
     {
         // Registers the script enqueue hook.
