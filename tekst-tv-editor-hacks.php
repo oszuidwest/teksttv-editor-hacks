@@ -11,26 +11,25 @@
  * @package TekstTVEditor
  */
 
-if (!defined('ABSPATH')) {
-    exit; // Exits if accessed directly.
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exits if accessed directly.
 }
 
 // Defines plugin constants.
-define('ZW_TTVEDITOR_PLUGIN_DIR', plugin_dir_path(__FILE__));
-define('ZW_TTVEDITOR_PLUGIN_URL', plugin_dir_url(__FILE__));
+define( 'ZW_TTVEDITOR_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
+define( 'ZW_TTVEDITOR_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 
 // Includes required files.
-require_once ZW_TTVEDITOR_PLUGIN_DIR . 'includes/class-ttveditor-settings.php';
-require_once ZW_TTVEDITOR_PLUGIN_DIR . 'includes/class-ttveditor-scripts.php';
+require_once ZW_TTVEDITOR_PLUGIN_DIR . 'includes/class-settings.php';
+require_once ZW_TTVEDITOR_PLUGIN_DIR . 'includes/class-scripts.php';
 
 /**
  * Initializes the plugin by loading settings and scripts classes.
  *
  * @return void
  */
-function zw_ttveditor_plugin_init(): void
-{
-    new \ZuidWest\TekstTVEditor\Settings();
-    new \ZuidWest\TekstTVEditor\Scripts();
+function zw_ttveditor_plugin_init(): void {
+	new \ZuidWest\TekstTVEditor\Settings();
+	new \ZuidWest\TekstTVEditor\Scripts();
 }
-add_action('plugins_loaded', 'zw_ttveditor_plugin_init');
+add_action( 'plugins_loaded', 'zw_ttveditor_plugin_init' );
